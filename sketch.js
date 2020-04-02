@@ -1,9 +1,11 @@
 // var population = prompt("Population", "1");
-var population = 1;
+var population = 50;
 class Vector {
   constructor(x, y) {
     this.x = x;
     this.y = y;
+    // this.magnitude = Math.sqrt(this.x ** 2 + this.y ** 2);
+    // console.log(this);
   }
 
   add(x) {
@@ -21,26 +23,39 @@ class Vector {
     this.y *= x.y;
   }
 
-  print() {
-    console.log(this.x, this.y);
-  }
-  unpack() {
-    return this.x, this.y;
+  limit(x) {
+    const m = this.mag();
+
+    // console.log(m);
+
+    if (m > x) {
+      this.mul(new Vector(1 / m, 1 / m));
+    }
   }
 
-  getUnitVector() {
-    const nsx = this.x / abs(this.x);
-    const nsy = this.y / abs(this.y);
+  static diff(source, target) {
+    return new Vector(target.x - source.x, target.y - source.y);
+  }
+
+  static distance(x, y) {
+    return Math.sqrt((x.x - y.x) ** 2 + (x.y - y.y) ** 2);
+  }
+
+  mag() {
+    return Math.sqrt(this.x ** 2 + this.y ** 2);
+  }
+
+  normalize() {
+    const m = this.mag();
+    const nsx = this.x / m;
+    const nsy = this.y / m;
     this.x = nsx;
     this.y = nsy;
   }
 
   setMaxMag(topSpeed) {
-    const maxX = abs(this.x) > topSpeed ? topSpeed / this.x : this.x;
-    // const maxY = this.y < 0 ? 1 : -1;
-    const maxY = abs(this.y) > topSpeed ? topSpeed / this.y : this.y;
-    this.x = maxX;
-    this.y = maxY;
+    this.normalize();
+    this.mul(new Vector(topSpeed, topSpeed));
   }
 }
 
@@ -67,20 +82,19 @@ class Person {
     this.a = new Vector(0, 0);
     this.v.add(this.a);
     this.accelerate();
-    this.home = new Vector(width / 2, height / 2);
+    // this.home = new Vector(width / 2, height / 2);
+    this.steerForce = new Vector(0, 0);
   }
 
   move() {
-    // ellipse(this.home.x, this.home.y, 20);
-    const sx = this.home.x - this.l.x;
-    const sy = this.home.y - this.l.y;
-    this.steerForce = new Vector(sx, sy);
-    this.steerForce.getUnitVector();
-    this.steerForce.setMaxMag(0.15);
-    // this.a.add(this.steerForce);
-    // this.v.add(this.a);
+    this.steerForce = Vector.diff(this.l, this.target.l);
+    // this.steerForce.add(new Vector(-100, -50));
+    this.steerForce.setMaxMag(1);
     this.v.add(this.steerForce);
+    this.v.limit(10);
     this.l.add(this.v);
+
+    // console.log(this.v);
   }
 
   reverseX() {
@@ -95,6 +109,22 @@ class Person {
   }
 
   show() {
+    if (this.l.x >= width * 0.9 - 10) {
+      // l=true
+      this.reverseX();
+    }
+    if (this.l.x <= width * 0.1 - 10) {
+      // l=true
+      this.reverseX();
+    }
+    if (this.l.y >= height * 0.9 - 10) {
+      // l=true
+      this.reverseY();
+    }
+    if (this.l.y <= height * 0.1 - 10) {
+      this.reverseY();
+    }
+
     // noStroke(); // stroke(12);
     if (this.v.x > 0 && this.v.y < 0) {
       fill("rgba(0, 255, 0,.7)");
@@ -105,19 +135,74 @@ class Person {
     } else {
       fill("rgba(255, 0, 250,.85)");
     }
+    ellipse(this.l.x, this.l.y, 8);
+  }
+}
 
-    ellipse(this.l.x, this.l.y, 6);
+class Target {
+  constructor(x, y) {
+    this.l = new Vector(x, y);
+    this.v = new Vector(0, 0);
+    this.a = new Vector(random(1, -1), random(-1, 1));
+    // this.v.add(this.a);
+    this.accelerate();
+    // this.home = new Vector(width / 2, height / 2);
+  }
+
+  move() {
+    this.l.add(this.v);
+  }
+
+  reverseX() {
+    this.v.x = -1 * this.v.x;
+  }
+  reverseY() {
+    this.v.y = -1 * this.v.y;
+  }
+
+  accelerate() {
+    this.a = new Vector(random(1, -1), random(-1, 1));
+    // this.v.add(this.a);
+    this.l.add(this.v);
+    this.show();
+  }
+
+  show() {
+    if (this.l.x >= width * 0.9 - 10) {
+      // l=true
+      this.reverseX();
+    }
+    if (this.l.x <= width * 0.1 - 10) {
+      // l=true
+      this.reverseX();
+    }
+    if (this.l.y >= height * 0.9 - 10) {
+      // l=true
+      this.reverseY();
+    }
+    if (this.l.y <= height * 0.1 - 10) {
+      this.reverseY();
+    }
+
+    ellipse(this.l.x, this.l.y, 20);
   }
 }
 
 function setup() {
-  cvs = createCanvas(windowWidth - 50, windowHeight - 50);
+  cvs = createCanvas(windowWidth * 0.9, windowHeight * 0.9);
+  target = new Target(width / 2, height / 2);
   w = new World(population);
+  // target = new Person(random(255), random(400));
+  w.people.forEach(p => (p.target = target));
 }
 
 function draw() {
   // frameRate(10);
-  // background(0);
+  background(0);
+  // target.accelerate();
+  // target.move();
+  target.l = new Vector(mouseX, mouseY);
+  target.show();
 
   w.people.forEach((person, idx, arr) => {
     person.accelerate();
@@ -126,8 +211,11 @@ function draw() {
 }
 
 function mousePressed() {
-  noLoop();
-  // w.people.push(new Person(mouseX, mouseY));
+  // noLoop();
+  // x = new Person(mouseX, mouseY);
+  // x.target = target;
+  // w.people.push(x);
+  target.l = new Vector(mouseX, mouseY);
 }
 
 function mouseReleased() {
