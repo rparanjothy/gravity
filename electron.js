@@ -10,7 +10,7 @@ class Vector {
     this.y += x.y;
   }
 
-  static addTwo(s, e) {
+  static addTo(s, e) {
     s.add(e);
     // console.log(s);
     return s;
@@ -88,130 +88,118 @@ class Vector {
   }
 }
 
-class link {
-  constructor(x, y) {
-    this.start = x;
-    this.end = y;
-    this.angle = 0;
-    this.angleinc = 0.01;
-  }
-
-  getMag() {
-    // console.log(this.start.mag(), this.end.mag());
-    return -this.start.mag() + this.end.mag();
-  }
-
-  getAngle() {
-    const [sx, sy] = this.start.unpack();
-    const [ex, ey] = this.end.unpack();
-    const opp = sy - ey;
-    const hyp = this.getMag();
-    const ang = Math.asin(opp / hyp);
-    // console.log(angle, opp, hyp);
-    return ang;
-  }
-
-  setAngle(ang) {
-    const [sx, sy] = this.start.unpack();
-    const [ex, ey] = this.end.unpack();
-    const diff = Vector.diff(this.start, this.end);
-    const dmag = diff.mag();
-    const [dx, dy] = diff.unpack();
-    console.log(dmag, ang, cos(ang) * dmag, sin(ang) * dmag);
-    return new Vector(cos(ang) * dmag + ex, sin(ang) * dmag + ey);
-  }
-
-  addLink(l) {
-    const child = new link(this.end);
-    console.log(child);
-    // this.links.push(child);
-  }
-
-  move() {
-    this.angle += this.angleinc;
-  }
-
-  show() {
-    stroke(255);
-    const [x, y] = this.setAngle(this.angle).unpack();
-    line(this.start.x, this.start.y, x, y);
-    // console.log(this);
-  }
-}
-
 class linkage {
-  constructor(origin, len, angle) {
-    this.start = origin;
-    this.end = Vector.fromMagandAngle(len, angle);
-    this.angle = angle;
+  constructor(origin, len, angle, pivotCap) {
+    this.sx = origin.x;
+    this.sy = origin.y;
+    this.ex = this.sx + Math.cos(this.angle) * this.len;
+    this.ey = this.sy + Math.sin(this.angle) * this.len;
     this.angleinc = 0.05;
     this.len = len;
+    this.angle = angle;
+    this.connectedLinks = [];
+    this.pivotCap = pivotCap;
   }
 
-  getMag() {
-    // console.log(this.start.mag(), this.end.mag());
-    return -this.start.mag() + this.end.mag();
+  getTail() {
+    return new Vector(this.ex, this.ey);
+  }
+  // static fromLenandAngle(l, a) {
+  //   return new linkage(null, l, a);
+  // }
+
+  addLink(l, a, pivotCap) {
+    console.log(this);
+    this.ex = this.sx + Math.cos(this.angle) * this.len;
+    this.ey = this.sy + Math.sin(this.angle) * this.len;
+
+    this.connectedLinks.push(
+      new linkage(new Vector(this.ex, this.ey), l, a, pivotCap)
+    );
   }
 
-  getAngle() {
-    const [sx, sy] = this.start.unpack();
-    const [ex, ey] = this.end.unpack();
-    const opp = sy - ey;
-    const hyp = this.getMag();
-    const ang = Math.asin(opp / hyp);
-    // console.log(angle, opp, hyp);
-    return ang;
-  }
-
-  setAngle(ang) {
-    // console.log(ang);
-    //  get x and Y from angle and mag
-    this.end = Vector.fromMagandAngle(this.len, ang);
-
-    // console.log(this, this.len, this.end);
+  setAngle(a) {
+    this.angle = a;
+    this.ex = this.sx + Math.cos(this.angle) * this.len;
+    this.ey = this.sy + Math.sin(this.angle) * this.len;
   }
 
   between(v, mn, mx) {
     return v >= mn && v <= mx;
   }
 
-  changeAngle(inc) {
-    this.setAngle(this.angle * Math.sign(Math.sin(this.angle)));
+  changeAngle() {
     this.angle += this.angleinc;
-  }
+    if (this.angle > this.pivotCap) {
+      this.angleinc = -0.05;
+    }
+    if (this.angle < -this.pivotCap) {
+      this.angleinc = 0.05;
 
-  addLink(l) {
-    const child = new link(this.end);
-    // this.links.push(child);
+      // this.angleinc = 0.05;
+      // this.reverse = !this.reverse;
+    }
+    // if (this.angle <= 0) {
+    // }
+
+    // console.log(this.angle, this.angleinc, (this.angle * 180) / Math.PI);
+
+    this.setAngle(this.angle);
   }
 
   move() {
-    // this.angle += this.angleinc;
-    // this.setAngle(this.angle);
-    this.changeAngle(this.angleinc);
+    this.changeAngle();
   }
 
   show() {
     stroke(255);
-    // const [x, y] = this.setAngle(this.angle).unpack();
-    line(this.start.x, this.start.y, this.end.x, this.end.y);
-    // console.log(this);
+    // const [ex, ey] = this.getTail().unpack();
+    // const [sx, sy] = this.start.unpack();
+    // background(10);
+    line(this.sx, this.sy, this.ex, this.ey);
   }
 }
 
 function setup() {
   createCanvas(windowWidth * 0.9, windowHeight * 0.9);
-  l = new linkage(Vector.fromMagandAngle(10, 0), 100, 0);
-  // console.log(l);
+  const origin = new Vector(0, 0);
+  l = new linkage(origin, 110, 0, Math.PI / 4 / 4);
+  l.addLink(200, 0, Math.PI / 4 / 4);
+  l2 = new linkage(origin, -110, 0, Math.PI / 4 / 4);
+  l2.addLink(-200, 0, Math.PI / 4 / 4);
 }
 
 function draw() {
-  frameRate(20);
+  // frameRate(5);
   background(0);
   translate(width / 2, height / 2);
-  //   ellipse(0, 0, 10);
   l.show();
+  ellipse(l.ex, l.ey, 5);
+  l.connectedLinks.forEach((x) => {
+    // background(0);
+    x.sx = l.ex;
+    x.sy = l.ey;
+    x.angle += l.angle;
+    x.show();
+    ellipse(x.ex, x.ey, 5);
+    x.move();
+  });
   l.move();
+
+  l2.show();
+  ellipse(l2.ex, l2.ey, 5);
+  l2.connectedLinks.forEach((x) => {
+    // background(0);
+    x.sx = l2.ex;
+    x.sy = l2.ey;
+    x.angle += l2.angle;
+    x.show();
+    ellipse(x.ex, x.ey, 5);
+    x.move();
+  });
+  l2.move();
+
+  // l.connectedLinks.forEach((x) => x.show());
 }
 
 function mouseClicked() {
@@ -220,4 +208,10 @@ function mouseClicked() {
 
 function mouseReleased() {
   loop();
+  // const lastLink =
+  //   l.connectedLinks.length > 0
+  //     ? l.connectedLinks[l.connectedLinks.length - 1]
+  //     : l;
+  // console.log(lastLink);
+  // lastLink.addLink(random(40) + 2, random(Math.PI / 2));
 }
