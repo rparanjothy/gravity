@@ -88,52 +88,47 @@ class Vector {
   }
 }
 
-class crazy {
-  constructor(cl, cr) {
-    this.cl = cl;
-    this.cr = cr;
-    // this.langle = random(Math.PI);
-    // this.rangle = random(Math.PI);
-    this.langle = 0;
-    this.rangle = 0;
-    this.l = Vector.diff(this.cl, this.cr).mag();
-    this.l1 = Vector.diff(this.cl, this.cr).mag() * 3;
-  }
-
-  setXY() {
-    this.x = Math.cos(this.langle) * this.l;
-    this.y = Math.sin(this.rangle) * this.l + 50;
-    this.langle += 0.04;
-    this.rangle += 0.04;
-    // this.l += 0.09;
-    // console.log(this.l);
-
-    this.x1 = Math.cos(this.langle) * this.l1;
-    this.y1 = Math.sin(this.rangle) * this.l1;
-    this.langle += 0.04;
-    this.rangle += 0.04;
-    // this.l1 += 0.1;
-  }
-
-  show() {
-    this.setXY();
-    stroke(212, 59);
-    // noStroke();
-    // ellipse(this.x, this.y, 5);
-    line(this.x, this.y, this.x1, this.y1);
-  }
-}
 function setup() {
-  createCanvas(windowWidth * 0.9, windowHeight * 0.9);
-  c = new crazy(new Vector(10, 10), new Vector(90, 40));
-  // l3.addLink(-200, 0, Math.PI / 4 / 4);
+  createCanvas(windowWidth, windowHeight);
+  size = 25;
+  ysize = 25;
+  x = 0;
+  y = 0;
 }
 
 function draw() {
   // frameRate(5);
   // background(0);
-  translate(width / 2, height / 2);
-  c.show();
+  stroke(255, 0, 250, 100);
+  strokeWeight(3);
+  random() > 0.5
+    ? line(x, y, x + size, y + ysize)
+    : line(x + size, y, x, y + ysize);
+  ellipse(x, y, 4);
+  x += size;
+  if (x >= windowWidth * 0.75) {
+    x = 0;
+    y += ysize;
+    if (y >= windowHeight * 0.75) {
+      y = 0;
+      noLoop();
+    }
+  }
+
+  // x1 = windowWidth / 2 + x + size;
+  // y1 = y + size;
+
+  // random() > 0.5
+  //   ? line(x1, y1, x1 + size, y1 + ysize)
+  //   : line(x1 + size, y1, x1, y1 + ysize);
+
+  // if (x1 >= windowWidth) {
+  //   x1 = 0;
+  //   y1 += ysize;
+  //   if (y1 >= windowHeight) {
+  //     noLoop();
+  //   }
+  // }
 }
 
 function mouseClicked() {
