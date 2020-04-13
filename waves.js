@@ -112,36 +112,41 @@ class Point {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   p = new Point(new Vector(0, 0));
-  p1 = new Point(new Vector(0, 400));
-  p2 = new Point(new Vector(0, 400));
+  p1 = new Point(new Vector(0, 0));
+  p2 = new Point(new Vector(0, 0));
+  p3 = new Point(new Vector(0, 0));
 
   pT = new Point(new Vector(0, 0));
-  inc = createSlider(0, 3, 1);
-  inc.position(0, 20);
 }
 
 function draw() {
   // frameRate(5);
   // background(0);
-  stroke(255, 0, 250, 100);
   strokeWeight(2);
   translate(0, 200);
   // p.pos.setAngle(1);
   // p.inc = map(0, inc.value(), 0, 1);
-  p.pos.angle += p.inc * 5;
-  p.pos.y = Math.sin(p.pos.angle) * 100;
+  p.pos.angle -= p.inc * 0.5;
+  p.pos.y = Math.sin(p.pos.angle) * 125;
   p.pos.x += p.inc * 40;
   // p.setPrev(p.pos.x, p.pos.y);
 
-  p1.pos.angle += p1.inc * 6;
-  p1.pos.y = Math.sin(p1.pos.angle) * 50;
+  p1.pos.angle -= p1.inc * 1;
+  p1.pos.y = Math.sin(p1.pos.angle) * 100;
   p1.pos.x += p1.inc * 40;
 
-  p2.pos.angle += p2.inc * 9;
-  p2.pos.y = Math.sin(p2.pos.angle) * 150;
+  p2.pos.angle -= p2.inc * 2;
+  p2.pos.y = Math.sin(p2.pos.angle) * 75;
   p2.pos.x += p2.inc * 40;
+
+  p3.pos.angle -= p3.inc * 4;
+  p3.pos.y = Math.sin(p3.pos.angle) * 50;
+  p3.pos.x += p3.inc * 40;
   // console.log(p.pos);
+  stroke(255, 0, 250, 100);
+
   p.show();
+
   stroke(255, 250, 0, 100);
 
   p1.show();
@@ -150,12 +155,15 @@ function draw() {
 
   p2.show();
 
+  stroke(255, 255, 255, 200);
+  p3.show();
+
   stroke(255, 0, 0);
   strokeWeight(5);
   // pT.pos.x = p1.pos.x + p.pos.x;
   pT.pos.x = p.pos.x;
 
-  pT.pos.y = 400 + p1.pos.y + p.pos.y + p2.pos.y;
+  pT.pos.y = 400 + p1.pos.y + p.pos.y + p2.pos.y + p3.pos.y;
 
   pT.show();
 }
