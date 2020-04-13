@@ -3,6 +3,7 @@ class Vector {
     this.x = x;
     this.y = y;
     // console.log(this);
+    this.angle = Math.atan2(this.y, this.x);
   }
 
   add(x) {
@@ -88,32 +89,64 @@ class Vector {
   }
 }
 
+class Point {
+  constructor(x) {
+    this.pos = x;
+    this.dia = 3;
+    this.inc = 0.01;
+    this.x1 = 0;
+    this.y1 = 0;
+  }
+
+  setPrev(x, y) {
+    this.x1 = x;
+    this.y1 = y;
+  }
+
+  show() {
+    point(this.pos.x + this.dia, this.pos.y, this.dia);
+    // line(this.pos.x, this.pos.y, this.x1, this.y1);
+  }
+}
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  size = 25;
-  ysize = 25;
-  x = 0;
-  y = 0;
+  p = new Point(new Vector(0, 0));
+  p1 = new Point(new Vector(0, 0));
+  pT = new Point(new Vector(0, 0));
+
+  var angle = 0;
 }
 
 function draw() {
   // frameRate(5);
   // background(0);
   stroke(255, 0, 250, 100);
-  strokeWeight(3);
-  random() > 0.5
-    ? line(x, y, x + size, y + ysize)
-    : line(x + size, y, x, y + ysize);
-  // ellipse(x, y, 4);
-  x += size;
-  if (x >= 400) {
-    x = 0;
-    y += ysize;
-    if (y >= 400) {
-      y = 0;
-      noLoop();
-    }
-  }
+  strokeWeight(2);
+  translate(0, windowHeight / 2);
+  // p.pos.setAngle(1);
+  p.pos.angle += p.inc * 2;
+  p.pos.y = Math.sin(p.pos.angle) * 80;
+  p.pos.x += p.inc * 20;
+  // p.setPrev(p.pos.x, p.pos.y);
+
+  p1.pos.angle += p1.inc * 2;
+  p1.pos.y = Math.sin(p1.pos.angle) * 20;
+  p1.pos.x += p1.inc * 20;
+
+  // console.log(p.pos);
+  p.show();
+  stroke(255, 250, 0, 100);
+
+  p1.show();
+
+  stroke(255, 0, 0);
+  strokeWeight(5);
+  // pT.pos.x = p1.pos.x + p.pos.x;
+  pT.pos.x = p.pos.x;
+  pT.pos.y = p1.pos.y + p.pos.y;
+
+  pT.show();
 }
 
 function mouseClicked() {
