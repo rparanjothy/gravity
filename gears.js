@@ -1,7 +1,16 @@
+let slider;
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  slider = createSlider(0, 200, 150, 10);
+  slider.position(10, 10);
+  slider.style("width", "80px");
+
+  shaft = createSlider(0, 500, 100, 10);
+  shaft.position(10, 40);
+  shaft.style("width", "80px");
+
   g1 = new gear("pink", 100, new Vector(0, 0), 0, 0.1, 100);
-  g2 = new gear("red", 200, new Vector(150, 0), 0, -0.05, 200);
+  g2 = new gear("red", 200, new Vector(150, 0), 0, -0.05, 400, 110);
   // g3 = new gear(
   //   "green",
   //   50,
@@ -9,11 +18,10 @@ function setup() {
   //   (Math.PI / 180) * 30,
   //   50 / 200
   // );
-  head = new Vector(-500, 0);
 }
 
 function draw() {
-  frameRate();
+  // frameRate(1);
   translate(width / 2, height / 2);
   background(0);
   // g1.move();
@@ -22,7 +30,7 @@ function draw() {
 }
 
 class gear {
-  constructor(color, dia, location, angle, speed, shaft) {
+  constructor(color, dia, location, angle, speed, shaft, pivotOffset) {
     this.color = color;
     this.dia = dia;
     this.radius = this.dia / 2;
@@ -32,6 +40,7 @@ class gear {
     this.dotLoc = new Vector(0, 0);
     this.shaft = shaft;
     this.head = new Vector(this.location.x - this.shaft, this.location.y);
+    this.pivotOffset = pivotOffset;
   }
 
   show() {
@@ -44,16 +53,39 @@ class gear {
   move() {
     this.show();
     this.angle += this.angleinc;
-    this.dotLoc.x = this.location.x + Math.cos(this.angle) * (this.radius - 10);
-    this.dotLoc.y = this.location.y + Math.sin(this.angle) * (this.radius - 10);
+    this.pivotOffset = slider.value();
+    this.shaft = shaft.value();
+    this.dotLoc.x =
+      this.location.x + Math.cos(this.angle) * (this.radius - this.pivotOffset);
+    this.dotLoc.y =
+      this.location.y + Math.sin(this.angle) * (this.radius - this.pivotOffset);
     strokeWeight(10);
     point(this.dotLoc.x, this.dotLoc.y);
     strokeWeight(1);
     let xoff = this.location.x - this.dotLoc.x;
-    line(this.dotLoc.x, this.dotLoc.y, this.head.x - xoff, 0);
-    strokeWeight(20);
-    point(this.head.x - xoff, this.head.y);
-    strokeWeight(2);
+    // line(this.dotLoc.x, this.dotLoc.y, this.head.x - xoff, 0);
+    let cx = this.dotLoc.x - this.location.x;
+    let cy = this.dotLoc.y - this.location.y;
+    // SEE Y COMPONENT
+    // line(this.dotLoc.x, this.location.y, this.dotLoc.x, this.dotLoc.y);
+
+    let a1 = Math.acos(cy / this.shaft);
+    let x1 = Math.sin(a1) * this.shaft;
+    // shaft
+    line(this.dotLoc.x + x1, 0, this.dotLoc.x, this.dotLoc.y);
+    // crank
+    line(this.dotLoc.x, this.dotLoc.y, this.location.x, this.location.y);
+
+    strokeWeight(10);
+    point(this.dotLoc.x + x1, 0);
+    strokeWeight(1);
+    // validate shaft length
+    // console.log(
+    //   Vector.distance(
+    //     new Vector(this.dotLoc.x, this.dotLoc.y),
+    //     new Vector(this.dotLoc.x + x1, 0)
+    //   )
+    // );
   }
 }
 
